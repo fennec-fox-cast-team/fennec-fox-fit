@@ -14,22 +14,7 @@ class_names = {0: 'sushi',
 
 transformation = transforms.Compose([
     transforms.Resize(256),
-    transforms.RandomCrop(244),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomApply([
-        transforms.RandomChoice([
-            transforms.RandomPerspective(0.1),
-            transforms.RandomPerspective(0.2)
-        ]),
-        transforms.RandomChoice([
-            transforms.RandomRotation((-20, 20)),
-            transforms.RandomRotation((-10, 10))
-        ])
-    ], p=0.5),
-    transforms.RandomApply([
-        transforms.ColorJitter(saturation=(0.8, 1.5)),
-        transforms.ColorJitter(contrast=(0.8, 1.5)),
-    ], p=0.5),
+    transforms.CenterCrop(244),
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
@@ -46,7 +31,6 @@ model.eval()
 def get_prediction(img):
     outputs = model(transformation(img).view(1, 3, 244, 244))
     _, preds = torch.max(outputs.data, 1)
-    print(outputs.data)
 
     return class_names[preds.tolist()[0]]
 
