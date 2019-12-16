@@ -1,14 +1,14 @@
 from flask_login import current_user, login_user, logout_user, login_required
-from flask import render_template, flash, redirect, url_for, jsonify, abort
-from jinja2 import escape
-from app import app, db
+from flask import render_template, flash, redirect, url_for, jsonify, abort, request
+from sqlalchemy import func, cast, Date
 import calendar
 import xml.etree.ElementTree as etree
 import datetime
 from app.errors import *
 from app.models import User, Dinner, Meal
 from app.forms import RegistrationForm, LoginForm
-from sqlalchemy import func, cast, Date
+from app import photos
+from app.model.main import get_prediction
 
 
 ################ Autentifiaction
@@ -100,6 +100,19 @@ def date_by_user(username, date):
 
     # print(dinners2meals)
     return render_template('dinner_by_date.html', dinners=dinners2meals)
+
+import PIL
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST' and 'photo' in request.files:
+        input()
+        img = PIL.Image.open(request.files['file'].read)
+        input()
+        #filename = photos.save(request.files['photo'])
+        #return filename
+        #img = PIL.Image.open(url_for('static', filename='hamburger1.jpeg'))
+        return get_prediction(img)
+    return render_template('upload.html')
 
 
 def get_formatted_calendar(year, month, username):

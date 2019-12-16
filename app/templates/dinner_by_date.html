@@ -4,17 +4,34 @@
     <style>
         table {
             border-collapse: collapse;
+            margin-left: 25%;
+        }
+        a {
+            text-decoration: none;
         }
         table, th, td {
-        border: 1px solid black;
+            font-size: 46px;
+            border: 1px solid black;
+        }
+        td
+        {
+            padding:10px 30px;
         }
     </style>
-
+    {% if dinners %}
     {% for dinner in dinners %}
         <div>
-            <h3>{{ dinner['name']  }}</h3> at {{ dinner['time'] }}
+            <h2>{{ dinner['name']  }}</h2> at {{ dinner['time'] }}
         </div>
         <table>
+
+            <tr>
+                <th>Meal name</th>
+                <td>Weight</td>
+                <td>Nutrition_value</td>
+                <td>Vitamins</td>
+            </tr>
+
         {% for meal in dinner['meals'] %}
 
             <tr>
@@ -26,8 +43,11 @@
 
         {% endfor %}
         </table>
-        <b>Sum of nutrition values: {{ dinner['sum_nutrition'] }} kcal.</b>
+        <h1>Sum of nutrition values: {{ dinner['sum_nutrition'] }} kcal.</h1>
     {% endfor %}
+    {% else %}
+    <h3>No records, yet!</h3>
+    {% endif %}
 
 
 {% endblock %}

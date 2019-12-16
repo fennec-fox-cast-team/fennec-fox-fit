@@ -24,7 +24,7 @@ model.fc = torch.nn.Sequential(torch.nn.Linear(in_features=2048,
                                                out_features=len(class_names),
                                                bias=True))
 
-model.load_state_dict(torch.load('model/food_clf.pth', map_location=torch.device('cpu')))
+model.load_state_dict(torch.load('app/model/food_clf.pth', map_location=torch.device('cpu')))
 model.eval()
 
 

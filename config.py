@@ -11,4 +11,4 @@ class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'fennec-fox-fit'
     SQLALCHEMY_DATABASE_URI = DB_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
+    UPLOADED_PHOTOS_DEST = 'static/img'
