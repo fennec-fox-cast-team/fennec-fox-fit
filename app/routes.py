@@ -1,11 +1,17 @@
 from flask_login import current_user, login_user, logout_user, login_required
-from flask import render_template, flash, redirect, url_for, jsonify
+from flask import render_template, flash, redirect, url_for, jsonify, abort
 from jinja2 import escape
 from app import app, db
+import calendar
+import xml.etree.ElementTree as etree
+import datetime
 from app.errors import *
-from app.models import User
+from app.models import User, Dinner, Meal
 from app.forms import RegistrationForm, LoginForm
+from sqlalchemy import func, cast, Date
 
+
+################ Autentifiaction
 
 @app.route('/')
 def index():
@@ -47,27 +53,68 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
-import calendar
-import datetime
+
+################
 
 @app.route('/calendar')
 def calendar_show():
-    text_calendar = calendar.HTMLCalendar(calendar.MONDAY)
+    # text_calendar = calendar.HTMLCalendar(calendar.MONDAY)
     this_month = datetime.date.today().month
     this_year = datetime.date.today().year
-    required_calendar = text_calendar.formatmonth(this_year, this_month)
-
-
-    
+    # required_calendar = text_calendar.formatmonth(this_year, this_month)
+    username = current_user.username
+    required_calendar = get_formatted_calendar(this_year, this_month, username.lower())
     return render_template('calendar.html', calendar=required_calendar)
 
 
-@app.route('/<user>/<date>')
-def date_by_user(user, date):
+@app.route('/<username>/<date>')
+def date_by_user(username, date):
     date = datetime.date(*[int(i) for i in date.split('-')])
-    u = User.query.filter_by(username=user).first()
-    return str(u) + str(date)
+    # date = datetime.datetime.strptime(date, '%Y-%m-%d')
+    user = User.query.filter(func.lower(User.username) == username).first()
+
+    if user is None:
+        return abort('User "{}" not found!'.format(username))
+
+    dinners = db.session.query(Dinner).filter(User.id == user.id).filter(cast(Dinner.date, Date) == date).all()
+    dinners2meals = []
+
+    for i, dinner in enumerate(dinners):
+        sum_nutrition = 0
+        dinners2meals.append({
+            'time': dinner.date,
+            'meals': [],
+            'name': 'Dinner ' + str(i + 1)
+        })
+        for portion in dinner.portions:
+            meal = Meal.query.filter_by(id=portion.meal_id).first()
+            sum_nutrition += meal.nutrition_value / 100. * portion.weight
+            dinners2meals[i].update({'meals': dinners2meals[i]['meals'] + [{
+                'name': meal.name,
+                'time': dinner.date,
+                'weight': portion.weight,
+                'nutrition_value': meal.nutrition_value / 100. * portion.weight,
+                'vitamins': meal.vitamins
+            }]})
+        dinners2meals[i].update({'sum_nutrition': sum_nutrition})
+
+    # print(dinners2meals)
+    return render_template('dinner_by_date.html', dinners=dinners2meals)
 
 
-def get_formatted_calendar(cal):
-    pass
+def get_formatted_calendar(year, month, username):
+    myCal = calendar.HTMLCalendar(calendar.MONDAY)
+    htmlStr = myCal.formatmonth(year, month)
+    htmlStr = htmlStr.replace("&nbsp;", " ")
+
+    root = etree.fromstring(htmlStr)
+    for elem in root.findall("*//td"):
+        if elem.text.isdigit():
+            new_elem = etree.Element('a')
+            new_elem.text = elem.text
+            new_elem.set('href', url_for('date_by_user', username=username,
+                                         date=str(year) + '-' + str(month) + '-' + str(new_elem.text)))
+            elem.append(new_elem)
+            elem.text = ''
+
+    return etree.tostring(root)

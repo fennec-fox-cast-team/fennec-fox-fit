@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content2 %}
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        table, th, td {
+        border: 1px solid black;
+        }
+    </style>
+
+    {% for dinner in dinners %}
+        <div>
+            <h3>{{ dinner['name']  }}</h3> at {{ dinner['time'] }}
+        </div>
+        <table>
+        {% for meal in dinner['meals'] %}
+
+            <tr>
+                <th>{{ meal['name'] }}</th>
+                <td>{{ meal['weight'] }}</td>
+                <td>{{ meal['nutrition_value'] }}</td>
+                <td>{{ meal['vitamins'] }}</td>
+            </tr>
+
+        {% endfor %}
+        </table>
+        <b>Sum of nutrition values: {{ dinner['sum_nutrition'] }} kcal.</b>
+    {% endfor %}
+
+
+{% endblock %}

@@ -1,3 +1,5 @@
+{% extends "bootstrap/base.html" %}
+{% block content %}
 <html>
     <head>
         {% if title %}
@@ -12,11 +14,12 @@
             Fennec Fox Fit:
             <a href="{{ url_for('index') }}">Home</a>
             {% if current_user.is_anonymous %}
-            <a href="{{ url_for('login') }}">Login</a>
-            <a href="{{ url_for('register') }}">Register</a>
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
             {% else %}
-            <a href="{{ url_for('logout') }}">Logout</a>
-            <p>Hello,{{current_user.username}}!</p>
+                <a href="{{ url_for('calendar_show') }}">My calendar</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+                <p>Hello,{{current_user.username}}!</p>
             {% endif %}
         </div>
         <hr>
@@ -29,6 +32,7 @@
         </ul>
         {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
+        {% block content2 %}{% endblock %}
     </body>
 </html>
+{% endblock %}
