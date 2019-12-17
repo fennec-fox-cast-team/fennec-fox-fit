@@ -1,22 +1,44 @@
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import render_template, flash, redirect, url_for, jsonify, abort, request
-from sqlalchemy import func, cast, Date
+from sqlalchemy import func, cast, Date, desc
 import calendar
 import xml.etree.ElementTree as etree
 import datetime
 from app.errors import *
-from app.models import User, Dinner, Meal
+from app.models import User, Dinner, Meal, Portion
 from app.forms import RegistrationForm, LoginForm
-from app import photos
+import PIL
 from app.model.main import get_prediction
 
 
-################ Autentifiaction
-
 @app.route('/')
 def index():
-    return render_template('index.html')
+    recent_activity = get_recent_activity()
+    return render_template('index.html', activity=recent_activity)
 
+
+def get_recent_activity():
+    recent_registered_users = User.query.order_by(User.registration_date).limit(20).all()
+    dinners = Dinner.query.order_by(desc(Dinner.date)).limit(20).all()
+
+    actions_ordered_by_date = []
+    for user in recent_registered_users:
+        actions_ordered_by_date.append({
+            'Date': str(user.registration_date),
+            'Action': 'User {} has joined the community!'.format(user.username)
+        })
+
+    for dinner in dinners:
+        portions_names = [(Meal.query.get(Portion.query.get(i.id).meal_id).name) for i in dinner.portions]
+        actions_ordered_by_date.append({
+            'Date': str(dinner.date),
+            'Action': 'User {} ate {}.'.format(User.query.get(dinner.user_id).username, ', '.join(portions_names))
+        })
+    actions_ordered_by_date.sort(key=lambda x: x['Date'], reverse=True)
+    return actions_ordered_by_date[:15]
+
+
+################ Autentifiaction
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -45,7 +67,7 @@ def register():
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
+        user = User(username=form.username.data, email=form.email.data, role=form.role.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -76,7 +98,7 @@ def date_by_user(username, date):
     if user is None:
         return abort('User "{}" not found!'.format(username))
 
-    dinners = db.session.query(Dinner).filter(User.id == user.id).filter(cast(Dinner.date, Date) == date).all()
+    dinners = db.session.query(Dinner).filter(Dinner.user_id == user.id).filter(cast(Dinner.date, Date) == date).all()
     dinners2meals = []
 
     for i, dinner in enumerate(dinners):
@@ -101,18 +123,49 @@ def date_by_user(username, date):
     # print(dinners2meals)
     return render_template('dinner_by_date.html', dinners=dinners2meals)
 
-import PIL
-@app.route('/upload', methods=['GET', 'POST'])
+
+@app.route('/upload', methods=['POST'])
 def upload():
     if request.method == 'POST' and 'photo' in request.files:
-        input()
-        img = PIL.Image.open(request.files['file'].read)
-        input()
-        #filename = photos.save(request.files['photo'])
-        #return filename
-        #img = PIL.Image.open(url_for('static', filename='hamburger1.jpeg'))
+        img = PIL.Image.open(request.files['photo'])
         return get_prediction(img)
+
+    return ''
+
+import json
+
+@login_required
+@app.route('/add_dinner', methods=['GET', 'POST'])
+def add_dinner():
+    if request.method == 'POST':
+        data = request.get_json()
+        dinner = Dinner(user_id=current_user.id)
+
+        meals_names = []
+        meals_weights = []
+        print(data)
+        # print(type(data))
+        # input()
+        for meal in data:
+            meals_names.append(meal['name'])
+            meals_weights.append(meal['weight'])
+
+        meals = Meal.query.filter(func.lower(Meal.name).in_([meal_name.lower() for meal_name in meals_names])).all()
+
+        for i, j in enumerate(meals):
+            p = Portion(meal_id=j.id, weight=float(meals_weights[i]))
+            dinner.portions.append(p)
+
+        db.session.add(dinner)
+        db.session.commit()
+
+        return '200, Ok'
     return render_template('upload.html')
+
+
+@app.route('/hey')
+def hey():
+    return 'Ok!'
 
 
 def get_formatted_calendar(year, month, username):

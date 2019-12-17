@@ -1,10 +1,92 @@
 {% extends "base.html" %}
 
 {% block content2 %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+
+    <table id="myTable">
+      <tbody>
+        <tr>
+            <td><input class="meal_name" placeholder="Meal name" id="meal_1"></td>
+            <td><input class="meal_weight" placeholder="Weight (grams)" id="weight_1"></td>
+        </tr>
+        <tr>
+            <td>
+            <form method=POST enctype=multipart/form-data action="{{ url_for('upload') }}">
+                <input id="upload_1" type=file name=photo>
+                <input id="b_1" onclick="get_prediction(this.id)" type="button" value="Upload">
+            </form>
+            </td>
+        </tr>
+      </tbody>
+    </table>
+    <br/><br/><br/>
 
     <form method=POST enctype=multipart/form-data action="{{ url_for('upload') }}">
-        <input type=file name=photo>
-        <input type="submit">
+        <button type="button" style="color: red" id="addMeal">Add meal</button>
     </form>
+    <button type="submit" onclick="send_data()" style="color: red" id="applyDinner">Done!</button>
 
+    <script>
+        var quantity = 1;
+        $("#addMeal").click(function() {
+            quantity += 1;
+            $("#myTable").append("<tr><td style='padding: 30px'></td></tr><tr>\n" +
+                `            <td><input class=\"meal_name\" placeholder=\"Meal name\" id=\"meal_${quantity}\"></td>\n` +
+                `            <td><input class=\"meal_weight\" placeholder=\"Weight (grams)\" id=\"weight_${quantity}\"></td>\n` +
+                "            <td>\n" +
+                    "</td></tr><tr><td>"+
+                "            <form method=POST enctype=multipart/form-data action=\"{{ url_for('upload') }}\">\n" +
+                `                <input id=\"upload_${quantity}\" type=file name=photo>\n` +
+                `                <input id=\"b_${quantity}\" onclick=\"get_prediction(this.id)\" type=\"button\" value=\"Upload\">\n` +
+                "            </form>\n" +
+                "            </td>\n" +
+                "        </tr>")
+        });
+
+
+        function get_prediction(id){
+            let num = id.split('_');
+            num = num[num.length - 1];
+            const form_data = new FormData();
+            form_data.append('photo', $(`#upload_${num}`)[0].files[0]);
+            $.ajax({
+                type: 'POST',
+            url: '/upload',
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+                }).then(resp => (
+                    document.getElementById(`meal_${num}`).value = resp
+                ));
+        }
+
+        function send_data() {
+            const meals_names = [];
+            const meals_weights = [];
+            for (const i of document.getElementsByClassName("meal_name")){
+               meals_names.push(i.value)
+            }
+            for (const i of document.getElementsByClassName("meal_weight")){
+               meals_weights.push(i.value)
+            }
+            const final = [];
+            for (let i =0; i < meals_names.length; i++){
+                if ((meals_names[i] !== '') && (meals_weights[i] !== ''))
+                final.push({name: meals_names[i], weight: meals_weights[i]})
+            }
+            $.ajax({
+                type: 'POST',
+            url: '/add_dinner',
+            data: JSON.stringify(final),
+            contentType: "application/json",
+            cache: false,
+            processData: false,
+                }).then(resp => resp === '200, Ok' ? alert('Done!') : alert('Some error!')
+            )
+
+        }
+
+    </script>
 {% endblock %}

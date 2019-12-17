@@ -4,11 +4,11 @@ import PIL
 
 
 class_names = {0: 'sushi',
-               1: 'hamburger',
+               1: 'burger',
                2: 'pizza',
                3: 'omelet',
                4: 'hot dog',
-               5: 'sandwiches',
+               5: 'sandwich',
                6: 'sausage',
                7: 'beef steak'}
 

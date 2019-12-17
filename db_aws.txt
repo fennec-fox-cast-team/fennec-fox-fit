@@ -1,0 +1,5 @@
+export POSTGRES_URL="fennec-fox.c6owbbbv56v8.eu-central-1.rds.amazonaws.com"
+export POSTGRES_USER="ivan"
+export POSTGRES_PW="foxpassword"
+export POSTGRES_DB="postgres"
+
