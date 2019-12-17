@@ -85,7 +85,7 @@ def calendar_show():
     this_year = datetime.date.today().year
     # required_calendar = text_calendar.formatmonth(this_year, this_month)
     username = current_user.username
-    required_calendar = get_formatted_calendar(this_year, this_month, username.lower())
+    required_calendar = get_formatted_calendar(this_year, this_month, username.lower()).replace(b'\n', b'').decode("utf-8")
     return render_template('calendar.html', calendar=required_calendar)
 
 

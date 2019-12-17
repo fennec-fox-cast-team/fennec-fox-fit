@@ -1,20 +1,53 @@
 {% extends "base.html" %}
 
 {% block content2 %}
+<div class="alert alert-info" role="alert"><h3>Add dinner</h3></div>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
+<style>
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+</style>
 
-    <table id="myTable">
+
+    <table id="myTable" style="margin-left:2%">
       <tbody>
+          <tr>
+              <td>1.</td>
+          </tr>
         <tr>
-            <td><input class="meal_name" placeholder="Meal name" id="meal_1"></td>
-            <td><input class="meal_weight" placeholder="Weight (grams)" id="weight_1"></td>
+            <td><input class="meal_name form-control" placeholder="Meal name" id="meal_1"></td>
+            <td><input class="meal_weight form-control" placeholder="Weight (grams)" id="weight_1"></td>
         </tr>
         <tr>
             <td>
             <form method=POST enctype=multipart/form-data action="{{ url_for('upload') }}">
-                <input id="upload_1" type=file name=photo>
-                <input id="b_1" onclick="get_prediction(this.id)" type="button" value="Upload">
+                <div class="form-group">
+                    <span class="btn btn-default btn-file">
+                        Browse <input id="upload_1" type=file name=photo>
+                    </span>
+                    <span class="input-group-btn">
+                        <button id="b_1" onclick="get_prediction(this.id)" class="btn btn-default" type="button">Upload</button>
+                    </span>
+                    <!-- <input id="b_1" onclick="get_prediction(this.id)" type="button" value="Upload"> -->
+                </div>
             </form>
             </td>
         </tr>
@@ -22,23 +55,37 @@
     </table>
     <br/><br/><br/>
 
-    <form method=POST enctype=multipart/form-data action="{{ url_for('upload') }}">
-        <button type="button" style="color: red" id="addMeal">Add meal</button>
-    </form>
-    <button type="submit" onclick="send_data()" style="color: red" id="applyDinner">Done!</button>
+    <table style="margin-left: 2%;">
+        <tbody>
+            <tr>
+                <td>
+                    <form method=POST enctype=multipart/form-data action="{{ url_for('upload') }}">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" style="color: red" id="addMeal"><span style="font-size: 1.2em;">Add meal</span></button>
+                        </span>
+                    </form>
+                </td>
+                <td>
+                    <span class="input-group-btn">
+                        <button type="submit" onclick="send_data()" class="btn btn-default" style="color: red" id="applyDinner"><span style="font-size: 1.2em;">Submit</span></button>
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
     <script>
         var quantity = 1;
         $("#addMeal").click(function() {
             quantity += 1;
-            $("#myTable").append("<tr><td style='padding: 30px'></td></tr><tr>\n" +
-                `            <td><input class=\"meal_name\" placeholder=\"Meal name\" id=\"meal_${quantity}\"></td>\n` +
-                `            <td><input class=\"meal_weight\" placeholder=\"Weight (grams)\" id=\"weight_${quantity}\"></td>\n` +
+            $("#myTable").append(`<tr><td>${quantity}.</td></tr><tr><td></td></tr><tr>\n` +
+                `            <td><input class=\"meal_name form-control\" placeholder=\"Meal name\" id=\"meal_${quantity}\"></td>\n` +
+                `            <td><input class=\"meal_weight form-control\" placeholder=\"Weight (grams)\" id=\"weight_${quantity}\"></td>\n` +
                 "            <td>\n" +
                     "</td></tr><tr><td>"+
                 "            <form method=POST enctype=multipart/form-data action=\"{{ url_for('upload') }}\">\n" +
-                `                <input id=\"upload_${quantity}\" type=file name=photo>\n` +
-                `                <input id=\"b_${quantity}\" onclick=\"get_prediction(this.id)\" type=\"button\" value=\"Upload\">\n` +
+                `                <div class="form-group"><span class="btn btn-default btn-file">Browse <input id=\"upload_${quantity}\" type=file name=photo></span>\n` +
+                `                <span class="input-group-btn"><input id=\"b_${quantity}\" onclick=\"get_prediction(this.id)\" class=\"btn btn-default\" type=\"button\" value=\"Upload\"></button></span></div>\n` +
                 "            </form>\n" +
                 "            </td>\n" +
                 "        </tr>")

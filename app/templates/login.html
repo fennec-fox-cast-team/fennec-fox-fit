@@ -2,26 +2,30 @@
 
 {% block content2 %}
 
-<h1>Sign In</h1>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.username.label }}<br>
-            {{ form.username(size=32) }}<br>
-            {% for error in form.username.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.password.label }}<br>
-            {{ form.password(size=32) }}<br>
-            {% for error in form.password.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-        <p>{{ form.submit() }}</p>
-    </form>
-    <p>New User? <a href="{{ url_for('register') }}">Click to Register!</a></p>
+    <div class="alert alert-info" style="margin-bottom: 20px;" role="alert"><h3>Sign In</h3></div>
+    <div class="col-xs-3">
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <!-- <td><input class="meal_name form-control" placeholder="Meal name" id="meal_1"></td> -->
+
+                <p>
+                    {{ form.username.label }}<br>
+                    {{ form.username(size=32, class_="form-control") }}<br>
+                    {% for error in form.username.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.password.label }}<br>
+                    {{ form.password(size=32, class_="form-control") }}<br>
+                    {% for error in form.password.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </p>
+                <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+                <p><input type=submit class='btn btn-success'></p>
+        </form>
+        <p>New User? <a href="{{ url_for('register') }}">Click to Register!</a></p>
+    </div>
 
 {% endblock %}
