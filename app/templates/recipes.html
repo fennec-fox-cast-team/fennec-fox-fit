@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content2 %}
+
+    <h1>Known recipes</h1>
+    <ul>
+    {% for meal in meals %}
+
+        <li>
+            <h3>{{meal.name}}</h3>
+            <br/>
+            <b>Nutrition value:</b> {{meal.nutrition_value}}
+            <ol>
+                {% for ingredient in meal.ingredients %}
+
+                    <li>{{ingredient}}</li>
+
+                {% endfor %}
+            </ol>
+            <b>Vitamins:</b> {{meal.vitamins}}
+
+        </li>
+
+    {% endfor %}
+    </ul>
+{% endblock %}

@@ -85,7 +85,8 @@ def calendar_show():
     this_year = datetime.date.today().year
     # required_calendar = text_calendar.formatmonth(this_year, this_month)
     username = current_user.username
-    required_calendar = get_formatted_calendar(this_year, this_month, username.lower()).replace(b'\n', b'').decode("utf-8")
+    required_calendar = get_formatted_calendar(this_year, this_month, username.lower()).replace(b'\n', b'').decode(
+        "utf-8")
     return render_template('calendar.html', calendar=required_calendar)
 
 
@@ -132,7 +133,6 @@ def upload():
 
     return ''
 
-import json
 
 @login_required
 @app.route('/add_dinner', methods=['GET', 'POST'])
@@ -161,6 +161,20 @@ def add_dinner():
 
         return '200, Ok'
     return render_template('upload.html')
+
+
+@app.route('/recipe')
+def watch_recipe():
+    meals = Meal.query.order_by(Meal.name).all()
+    meals_dumps = []
+    for meal in meals:
+        meals_dumps.append({
+            'name': meal.name,
+            'ingredients': meal.ingredients,
+            'vitamins': meal.vitamins,
+            'nutrition_value': meal.nutrition_value})
+
+    return render_template('recipes.html', meals=meals_dumps)
 
 
 @app.route('/hey')

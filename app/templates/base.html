@@ -20,6 +20,7 @@
                     {% if not current_user.is_anonymous %}
                         <li><a href="{{ url_for('calendar_show') }}">My calendar</a></li>
                         <li><a href="{{ url_for('add_dinner') }}">Add dinner</a></li>
+                        <li><a href="{{ url_for('watch_recipe') }}">Recipes</a></li>
                     {% endif %}
                 </ul>
 
